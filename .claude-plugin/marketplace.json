@@ -1,15 +1,16 @@
 {
   "name": "korean-tax-agent",
   "owner": {
-    "name": "minsooparkk"
+    "name": "Kernelspace",
+    "email": "hello@kernelspace.io"
   },
-  "description": "한국 세법 AI 검토 스킬 — 택스닥터 세법 MCP 기반 세무 검토 (easy/hard 모드)",
+  "description": "한국 세법 검토 스킬 — TaxDoctor 세법 MCP 기반 근거 검색·인용 검증 (easy/hard 모드)",
   "plugins": [
     {
       "name": "korean-tax-agent",
       "source": "./",
-      "description": "한국 세법 AI 검토 스킬 — 택스닥터 세법 MCP(korea-tax-law, mcp.taxdoctorai.com)의 세법 그래프 DB로 법령·판례·결정례·예규·별표·조세조약을 검색하고 인용까지 검증해 세무 검토의견을 작성한다. easy/hard 모드 지원.",
-      "version": "2.0.0"
+      "description": "한국 세법 질문을 TaxDoctor 세법 MCP(mcp.taxdoctorai.com, 읽기 전용·무료·로그인 없음)로 조문·판례·결정례·해석례·별표·부칙·조세조약 원문을 조회하고 인용까지 대조해 근거가 달린 검토의견을 쓰는 스킬. easy/hard 모드. 실무 참고용이며 세무 자문이 아니다.",
+      "version": "2.1.0"
     }
   ]
 }
