@@ -13,11 +13,11 @@ argument-hint: "[easy|hard] [세무 질문]"
 | MCP | 무엇 | 언제 쓰나 |
 |---|---|---|
 | **korea-tax-law** (주) | 세법 그래프 DB(읽기 전용). 국세·지방세 현행 법·령·칙과 지난 시점 판, 부칙 적용례·경과조치, 판례·조세심판원·국세청 불복 결정례, 국세청·법제처·행안부 해석례, 별표·서식, 시행예정 개정, 조세조약이 **본문까지** 들어 있고 위임·인용 관계로 이어져 있다. 세법과 따로 표시된 **비세법 참조 법령**(민법·주택법·민간임대주택법·도시정비법·노동·사회보험 법령 등)과 조정대상지역 지정 이력도 있다 | 세법 안의 일은 전부 여기서. 조문·위임 추적·판례·해석례·별표·과거 시점 조문·부칙·조약·인용 검증, 그리고 수록된 비세법 전제 조문 |
-| **korean-law** (보조, 선택) | 법제처 국가법령정보 실시간 조회 | korea-tax-law의 참조 법령 목록에 **없는** 세법 밖 법령·조례, 그리고 korea-tax-law 수록 범위(조문마다 다르고 대략 2015~2016년 이후) 앞의 과거 시점 조문에만 |
 
-이 문서와 `references/`에서 서버 이름 없이 적은 도구(`search_tax`, `get_article` …)는
-모두 korea-tax-law 도구다. korean-law 도구는 `korean-law: search_law`처럼 서버 이름을
-붙여 적는다.
+이 문서와 `references/`에 적은 도구(`search_tax`, `get_article` …)는 모두 korea-tax-law 도구다.
+이 서버에 없는 법령(참조 법령 목록에도 없는 세법 밖 법령·조례)과 수록 범위(조문마다 다르고 대략
+2015~2016년 이후) 앞 시점의 조문은 조회하지 못한 것으로 답변에 밝히고, 국가법령정보센터(law.go.kr)
+확인을 안내한다.
 
 사용자 입력: $ARGUMENTS
 
@@ -35,8 +35,8 @@ argument-hint: "[easy|hard] [세무 질문]"
   (`search_tax`, `get_article`, `verify_citations`)으로 찾는다.
   - korea-tax-law 도구가 없으면 검색을 진행하지 말고 MCP 설정이 필요하다고 안내한다
     (README 참조). **자체 지식만으로 세법 답변을 만들지 않는다.**
-  - korean-law가 없어도 그대로 진행한다. korea-tax-law에 없는 세법 밖 법령이 전제인
-    대목에서만 "해당 법령은 확인하지 못했다"고 답변에 명시한다.
+  - korea-tax-law에 없는 세법 밖 법령이 전제인 대목은 "해당 법령은 확인하지 못했다"고
+    답변에 명시하고 국가법령정보센터(law.go.kr) 확인을 권한다. 기억으로 조문을 채우지 않는다.
 
 ## 1. 모드 결정
 
@@ -79,7 +79,7 @@ argument-hint: "[easy|hard] [세무 질문]"
    | 내년 이후 과세기간·"앞으로 바뀌나" | 쟁점 조문은 `get_article`의 시행예정 표시, 법령 전체는 `list_upcoming(law_name)`. 개정 내용 전문을 읽지 못했으면 "○○○○년 ○월 시행 개정이 예정돼 있어 그 시점 조문 확인이 필요하다"까지만 쓴다 |
    | 조세조약 | `list_treaties` → `search_treaties` → `get_treaty_article`. 제한세율은 반드시 `get_treaty_article`에서 읽는다 — 본문은 협약 원문이고, 뒤에 붙는 "이 조문을 개정한 부속문서" 발췌가 바뀐 세율이다 |
    | 세법 밖 전제 조문 (민법·주택법·민간임대주택법·도시정비법·근로기준법·4대보험 법령 등) | `get_reference_article(law_name, article_number, as_of)` / `search_reference_articles`. 응답에 "세법이 아님"이 붙는다 — 세법상 결론은 세법 조문으로 따로 확인 |
-   | 참조 법령 목록에도 없는 법령 (공정거래법 등) | `korean-law: search_law` → `korean-law: get_law_text` |
+   | 참조 법령 목록에도 없는 법령 (공정거래법 등) | 이 서버로는 조회할 수 없다. 그 전제가 걸린 대목은 "확인하지 못했다"고 밝히고 국가법령정보센터(law.go.kr) 확인을 안내 |
    | 조정대상지역·투기과열지구·투기지역 지정 여부 | `get_regulated_area_history(region, as_of)` — 세법 아님. 중과·거주요건 효과는 세법 조문으로 |
    | 수록 법령인지 확인 | `list_laws` (세법 목록과 비세법 참조 법령 목록을 함께 준다) |
 
@@ -148,8 +148,8 @@ taxdoctorai.com 검토 파이프라인의 4단계를 **단계별 서브에이전
 - **[2] Source Search**:
   > `<references 절대경로>/source-search.md`를 Read하고 그 지침을 정확히 따라
   > TaxDoctor 세법 MCP(korea-tax-law — 도구 이름이 `search_tax`·`get_evidence`·
-  > `get_article`로 끝나는 것)로 근거를 검색하라. korea-tax-law에 없는 세법 밖 법령만
-  > korean-law를 쓴다. 출력은 지침 §4의 JSON만 반환한다.
+  > `get_article`로 끝나는 것)로 근거를 검색하라. korea-tax-law에 없는 법령은 찾지 말고
+  > `coverage_gaps`에 적는다. 출력은 지침 §4의 JSON만 반환한다.
   > Query Analysis 결과: <JSON 전문>
 - **[3] FactCheck**:
   > `<references 절대경로>/fact-check.md`를 Read하고 그 지침을 정확히 따라
@@ -183,7 +183,7 @@ taxdoctorai.com 검토 파이프라인의 4단계를 **단계별 서브에이전
 | `renumbered` | 해석례의 예전 번호와 지금 국세청 번호가 다른 같은 문서 | 그대로 두되 지금 번호(`current_number`)를 병기 |
 | `number_conflict` | 해석례 목록 번호와 원문 번호가 달라 그 문서인지 확정하지 못했다 | 확인 메모 |
 | 판례 `history` | 원심·상고심·파기환송 후 판결 | 인용한 판결이 뒤에서 뒤집혔으면 확인 메모 |
-| `status: unchecked` · `unresolved_articles` | 검사하지 못했다 (법령명 생략 표기, 부칙 조문 등) | 통과로 치지 않는다. 검색 단계에서 원문을 확인한 것(korean-law로 본 법령, `get_amendments`로 본 부칙)이면 그대로 두고, 아니면 확인 메모 |
+| `status: unchecked` · `unresolved_articles` | 검사하지 못했다 (법령명 생략 표기, 부칙 조문 등) | 통과로 치지 않는다. 검색 단계에서 원문을 확인한 것(`get_reference_article`로 본 참조 법령, `get_amendments`로 본 부칙)이면 그대로 두고, 아니면 확인 메모 |
 
 - **easy 모드**: 답변을 쓴 것이 자신이므로, 걸린 인용은 `get_article` 등으로 다시
   확인해 바로잡거나 뺀 뒤 전달한다. 다시 확인해도 못 찾으면 확인 메모로 남긴다.
@@ -225,11 +225,10 @@ taxdoctorai.com 검토 파이프라인의 4단계를 **단계별 서브에이전
 | 증상 | 대응 |
 |---|---|
 | korea-tax-law 도구가 안 보임 | MCP 설정 안내 (README 참조). 자체 지식으로 답하지 않는다 |
-| korean-law만 안 보임 | 그대로 진행. korea-tax-law에 없는 세법 밖 법령이 전제인 대목만 "확인하지 못했다"고 명시 |
 | 호출 한도 안내 (`retry_after_seconds` 또는 "잠시 뒤 다시") | 안내된 만큼 기다렸다 다시 부른다. 무시하고 계속 부르면 한동안 호출이 막힌다 |
 | MCP 호출 연속 실패 | 2~3회 재시도 후 사용자에게 서버 상태를 알리고 중단 |
-| 응답 첫 줄이 `[NOT_FOUND]` | 법령명·조번호가 수록 범위에 없다. `list_laws`로 수록 여부를 확인하고, 세법 밖 법령이면 korean-law로 |
-| 응답 첫 줄이 `[NOT_COVERED:…]` | 그 시점 판이 수록 범위 밖이다. 현행으로 대신하지 말고 `korean-law: get_law_text`(`efYd`에 그 날짜)로 한 번 시도, 그래도 없으면 "확인 불가"로 답변에 명시 |
+| 응답 첫 줄이 `[NOT_FOUND]` | 법령명·조번호가 수록 범위에 없다. `list_laws`로 수록 여부를 확인하고, 세법 밖 법령이면 `get_reference_article`·`search_reference_articles`로. 거기에도 없으면 "확인하지 못했다"고 명시 |
+| 응답 첫 줄이 `[NOT_COVERED:…]` | 그 시점 판이 수록 범위 밖이다. 현행으로 대신하지 말고 "확인 불가"로 답변에 명시하고 그 시점 조문은 국가법령정보센터(law.go.kr)에서 확인하도록 안내 |
 | 검색 0건 | 키워드 일반화 1회 재시도 → `list_laws`로 수록 법령인지 확인 → 그래도 없으면 답변에 그 한계를 명시 |
 | 응답이 너무 큼 (`search_tax`) | 여러 건은 `detail: "list"`로 목록만 받고, 원문은 `limit` 1~3으로 읽는다 (`references/source-search.md` §2-A) |
 

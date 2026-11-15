@@ -1,5 +1,5 @@
 {
-  "name": "korean-tax-agent",
+  "name": "taxdoctor-tax-review",
   "displayName": "TaxDoctor 세무 검토",
   "description": "한국 세법 질문을 TaxDoctor 세법 MCP(mcp.taxdoctorai.com, 읽기 전용·무료·로그인 없음)로 조문·판례·결정례·해석례·별표·부칙·조세조약 원문을 조회하고 인용까지 대조해 근거가 달린 검토의견을 쓰는 스킬. easy/hard 모드. 실무 참고용이며 세무 자문이 아니다.",
   "version": "2.1.0",
@@ -8,7 +8,7 @@
     "email": "hello@kernelspace.io"
   },
   "homepage": "https://taxdoctorai.com/mcp-guide",
-  "repository": "https://github.com/minsooparkk/korean-tax-agent",
+  "repository": "https://github.com/kernelspaces/korean-tax-agent",
   "license": "MIT",
   "documentationUrl": "https://taxdoctorai.com/mcp-guide",
   "privacyPolicyUrl": "https://taxdoctorai.com/privacy",

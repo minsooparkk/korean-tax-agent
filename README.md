@@ -1,4 +1,4 @@
-# TaxDoctor 세무 검토 (korean-tax-agent)
+# TaxDoctor 세무 검토 (taxdoctor-tax-review)
 
 한국 세법 질문에 **조문·판례·해석례 원문을 근거로 붙여** 검토의견을 쓰는 Claude 스킬입니다.
 공개 TaxDoctor 세법 DB(MCP)를 **읽기 전용**으로 조회하며, **무료이고 로그인·API 키가 없습니다.**
@@ -53,18 +53,16 @@ claude.ai에서 **Customize › Plugins › Discover**를 열고 "TaxDoctor 세�
 Claude Code 안에서:
 
 ```
-/plugin marketplace add minsooparkk/korean-tax-agent
-/plugin install korean-tax-agent@korean-tax-agent
+/plugin marketplace add kernelspaces/korean-tax-agent
+/plugin install taxdoctor-tax-review@korean-tax-agent
 ```
 
 ### 스킬만 수동 설치
 
 ```bash
-git clone https://github.com/minsooparkk/korean-tax-agent.git
+git clone https://github.com/kernelspaces/korean-tax-agent.git
 cp -r korean-tax-agent/skills/tax ~/.claude/skills/
 claude mcp add --transport http korea-tax-law https://mcp.taxdoctorai.com/mcp
-# 선택 — TaxDoctor DB에 없는 세법 밖 법령까지 조회하려면
-claude mcp add --transport http korean-law https://korean-law-mcp.fly.dev/mcp
 ```
 
 claude.ai 커넥터나 다른 이름으로 `https://mcp.taxdoctorai.com/mcp`를 이미 연결해 두었다면
@@ -91,21 +89,20 @@ claude.ai 커넥터나 다른 이름으로 `https://mcp.taxdoctorai.com/mcp`를 
 
 이 플러그인은 로컬에서 아무것도 실행하지 않습니다(스크립트·훅·실행 파일·설치 패키지 없음).
 파일을 읽거나 쓰지 않고, 자격 증명이나 환경 변수를 읽지 않으며, 대화 내용을 저장하지 않습니다.
-하는 일은 Claude가 아래 두 원격 MCP 서버(`.mcp.json`에 선언)의 도구를 부르게 하는 것뿐입니다.
+하는 일은 Claude가 아래 원격 MCP 서버 하나(`.mcp.json`에 선언)의 도구를 부르게 하는 것뿐입니다.
 
 | 서버 | 운영 | 보내는 것 | 받는 것 |
 |---|---|---|---|
-| `korea-tax-law` — `https://mcp.taxdoctorai.com/mcp` (주) | TaxDoctor | Claude가 질문에서 뽑은 검색어·법령명·조문 번호·문서번호·기준일, 질문의 쟁점 문장(해석례 검색), 그리고 인용 검증 단계에서 **작성한 답변 초안 본문** | 조문·판례·결정례·해석례·별표·부칙·조약 원문 |
-| `korean-law` — `https://korean-law-mcp.fly.dev/mcp` (보조, 선택) | 제3자가 운영하는 공개 서버 | TaxDoctor DB에 없는 세법 밖 법령을 찾을 때의 법령명·조문 번호·기준일 | 법제처 국가법령정보 조문 |
+| `korea-tax-law` — `https://mcp.taxdoctorai.com/mcp` | TaxDoctor | Claude가 질문에서 뽑은 검색어·법령명·조문 번호·문서번호·기준일, 질문의 쟁점 문장(해석례 검색), 그리고 인용 검증 단계에서 **작성한 답변 초안 본문** | 조문·판례·결정례·해석례·별표·부칙·조약 원문 |
 
-- 두 서버 모두 **읽기 전용**이고 로그인이 없어 이름·이메일 같은 계정 정보를 보내지 않습니다.
+- 서버는 **읽기 전용**이고 로그인이 없어 이름·이메일 같은 계정 정보를 보내지 않습니다.
 - `korea-tax-law` 서버는 검색어와 대화 내용을 기록하지 않고, 과도한 호출 차단과 장애 대응을
   위해 접속 IP·연결 프로그램 정보·호출한 도구 이름·처리 시간을 90일간 보관합니다. 실무 용어로
   조문을 찾을 때(`search_articles`)는 관련도 순위를 매기려고 검색어와 후보 조문 일부를 순위 제공자
   (TypeSafe AI, 미국)에 보냅니다. 자세한 내용: [TaxDoctor 개인정보처리방침](https://taxdoctorai.com/privacy).
-- `korean-law` 서버는 이 플러그인의 작성자가 운영하지 않으며, 그 서버의 정책이 적용됩니다.
-  쓰지 않으려면 이 서버를 끄세요(Claude Code에서는 `/mcp`). 스킬은 그대로 동작하고, 세법 밖
-  법령이 전제인 대목만 "확인하지 못했다"고 밝힙니다.
+- TaxDoctor DB에 없는 법령(참조 법령 목록에도 없는 세법 밖 법령·조례)이나 수록 범위 앞 시점의
+  조문은 다른 곳에서 찾지 않습니다. 답변이 그 대목을 "확인하지 못했다"고 밝히고 국가법령정보센터
+  (law.go.kr) 확인을 안내합니다.
 - 질문에 주민등록번호·계좌번호처럼 검토에 필요 없는 개인정보는 넣지 마세요. Claude가 그 내용을
   검색어로 옮길 수 있습니다.
 
@@ -123,19 +120,15 @@ DB입니다. 세법과 따로 표시된 비세법 참조 법령과 조정대상�
 `verify_citations`, `list_laws`, `list_treaties`, `search_treaties`, `get_treaty_article`,
 `search_reference_articles`, `get_reference_article`, `get_regulated_area_history`)가 모두 읽기 전용입니다.
 
-**korean-law — 법제처 실시간 조회 (보조, 선택)**
-
-TaxDoctor DB에 없는 세법 밖 법령·조례와, DB 수록 범위(대략 2015~2016년 이후) 앞 시점의 조문을
-조회할 때만 씁니다.
-
 ## 구조
 
 ```
 korean-tax-agent/
 ├── .claude-plugin/
 │   ├── plugin.json           # 플러그인 매니페스트
+│   ├── icon.png              # 목록 아이콘 (TaxDoctor)
 │   └── marketplace.json      # Claude Code 마켓플레이스 정의
-├── .mcp.json                 # 원격 MCP 서버 두 개 (플러그인을 켜면 연결)
+├── .mcp.json                 # 원격 MCP 서버 하나 (플러그인을 켜면 연결)
 └── skills/
     └── tax/
         ├── SKILL.md          # 오케스트레이터 — 모드 라우팅, 실행 규칙, 인용 검증
@@ -152,7 +145,9 @@ korean-tax-agent/
   즉답·AI 관련도 순위, `get_article` 기준일 판, `get_amendments`, `get_article_tiers`, 비세법 참조
   법령, 조정대상지역 이력). 원본 파이프라인 지침의 최근 규칙 반영(사실관계·방향 고정, 기한 질문의
   기산일 조문, 조특법 공통 제한 조문, 계산은 등호 산식으로, 사용자 정정·반박 다루기, "확인 불가"는
-  적용 부정이 아님). README에 데이터 처리 안내 추가
+  적용 부정이 아님). README에 데이터 처리 안내 추가. 플러그인 이름을 `taxdoctor-tax-review`로 바꾸고
+  저장소를 kernelspaces 조직으로 옮김. 보조 MCP(korean-law) 연결을 뺌 — TaxDoctor DB의 비세법 참조
+  법령 계층이 그 역할을 맡고, 없는 법령은 "확인하지 못했다"로 밝힘. 목록 아이콘 추가
 - **v2.0.0** — TaxDoctor 세법 MCP 중심으로 전환. 통합 그래프 탐색, 별표·시행예정 개정·과거 시점
   조문, 답변 인용 검증 추가
 - **v1.0.0** — 최초 공개. korean-law MCP 기반

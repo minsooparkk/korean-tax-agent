@@ -3,10 +3,6 @@
     "korea-tax-law": {
       "type": "http",
       "url": "https://mcp.taxdoctorai.com/mcp"
-    },
-    "korean-law": {
-      "type": "http",
-      "url": "https://korean-law-mcp.fly.dev/mcp"
     }
   }
 }

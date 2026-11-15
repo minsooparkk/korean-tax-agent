@@ -4,7 +4,7 @@
 
 세무 질문에 대한 법적 근거를 **TaxDoctor 세법 MCP(korea-tax-law)로 정밀하게 탐색**하여, 쟁점별로
 **왜 이 근거가 필요한지** 설명 가능한 형태로 반환하는 검색 전문 단계. korea-tax-law에
-수록되지 않은 세법 밖 법령만 보조 MCP(korean-law)로 확인한다.
+수록되지 않은 법령은 찾지 않고 `coverage_gaps`에 적는다.
 
 ---
 
@@ -189,7 +189,7 @@
 - 긴 결정례(수만 자)는 전부 읽지 않는다. 요지를 먼저 보고, 채택할 것만 판단 부분까지
   읽어 필요한 대목을 발췌한다. `limit`(글자 수, 기본 12,000)을 필요한 만큼만 준다.
 
-### 2-D. 세법 밖 법령 — 참조 법령 계층 먼저, 없으면 korean-law (보조)
+### 2-D. 세법 밖 법령 — 참조 법령 계층
 
 korea-tax-law의 세법 목록에는 부동산실명법·상가건물 임대차보호법·금융실명법처럼 국세청
 조세법령 목록에 든 관련 법령도 들어 있다(그건 `get_article`로 읽는다). 그 밖에 부동산·
@@ -200,15 +200,14 @@ korea-tax-law의 세법 목록에는 부동산실명법·상가건물 임대차�
 |---|---|---|
 | 참조 법령 조문 | `get_reference_article(law_name, article_number, as_of)` | 민법·주택법·민간임대주택법·도시정비법·근로기준법 등. `as_of`를 주면 그날의 판(2016-01-01 당시 판부터, 그 이전은 확인 불가). 고시는 `article_number`에 '본문'·'별표 1' |
 | 참조 법령 조문 검색 | `search_reference_articles(query, law_name)` | 조문번호를 모를 때 |
-| 참조 법령 목록에도 없는 법령·조례·행정규칙 | `korean-law: search_law` → `korean-law: get_law_text` | 법령명으로 `mst`를 얻고 `mst`+`jo`("제1000조")로 조문 조회. `efYd`에 날짜를 넣으면 그날 시행 중이던 판 |
-| korea-tax-law 수록 범위 앞 시점의 조문 | `korean-law: get_law_text`(`efYd`) 또는 `korean-law: legal_analysis` mode=`applicable_law`(`lawName`+`date`+`jo`) | `get_article(as_of)`가 `before_data`일 때만 |
+| 참조 법령 목록에도 없는 법령·조례·행정규칙, 수록 범위 앞 시점의 조문 | — | 이 서버로 조회할 수 없다. `coverage_gaps`에 "세법 밖 법령 미확인" 또는 "그 시점 판 미수록"으로 적어, 답변이 국가법령정보센터(law.go.kr) 확인을 안내하게 한다 |
 
 - 참조 법령 응답에 "세법이 아님"이 붙는다. 그 조문으로 세법상 결론(과세 여부·세율·공제·
   감면)을 내지 않는다 — 세법 조문으로 따로 확인한다.
 - 참조 법령 조문이 기준을 하위 법령·고시에 맡겼는데 그것이 미수록이면 응답에 "위임 법령
   미수록"이 붙는다. 그 기준값은 확인하지 못한 것으로 `coverage_gaps`에 적는다.
-- korean-law가 연결돼 있지 않은데 참조 법령 목록에도 없으면 `coverage_gaps`에 "세법 밖
-  법령 미확인"으로 적고 넘어간다. 세법 조문·판례·해석례를 korean-law로 찾지 않는다.
+- 참조 법령 목록에도 없으면 `coverage_gaps`에 "세법 밖 법령 미확인"으로 적고 넘어간다.
+  기억으로 조문 내용을 채우지 않는다.
 
 ### 2-1. 탐색 절차
 
@@ -239,7 +238,7 @@ Step 6: 비거주자·외국법인 쟁점 또는 search_intents.treaty
           국내법 조문과 조약 조문을 **함께** 확보한다 (조약이 우선한다)
 Step 7: search_intents.nontax_law
         → get_reference_article (as_of는 timing.as_of) → 참조 법령 목록에 없으면
-          korean-law: search_law → get_law_text
+          coverage_gaps에 기록
         → 조정대상지역·투기과열지구 지정 여부가 전제면 get_regulated_area_history
 Step 8: 각 결과를 issue_id에 매핑하고, 매핑 불가 결과 제거
 ```
@@ -248,7 +247,7 @@ Step 8: 각 결과를 issue_id에 매핑하고, 매핑 불가 결과 제거
 - 검색 결과가 0건이면 키워드를 한 단계 일반화해 1회 재시도한다. 그래도 없으면
   `coverage_gaps`에 기록하고 넘어간다 — 무한 재검색 금지.
 - 조문이 0건이거나 응답 첫 줄이 `[NOT_FOUND]`면 `list_laws`로 **수록 법령인지** 먼저
-  확인한다. 세법·참조 법령 어디에도 없으면 korean-law로 넘어간다.
+  확인한다. 세법·참조 법령 어디에도 없으면 `coverage_gaps`에 적는다.
 - 호출 한도 안내가 오면 안내된 시간(`retry_after_seconds`)만큼 기다렸다 다시 부른다.
 
 ### 2-2. 탐색 범위 제한 규칙
@@ -288,8 +287,8 @@ Step 8: 각 결과를 issue_id에 매핑하고, 매핑 불가 결과 제거
 조문만 있거나 다른 법 조문뿐이면 거르지 않는다.
 
 **원문 확보 기준**:
-- 법령 근거는 `search_tax`·`get_article`(세법), `get_reference_article`(참조 법령) 또는
-  `korean-law: get_law_text`(그 밖의 세법 밖 법령)로 받은 적용 조항 원문을 `original_text`에
+- 법령 근거는 `search_tax`·`get_article`(세법) 또는 `get_reference_article`(참조 법령)로
+  받은 적용 조항 원문을 `original_text`에
   포함한다. 조문 시행일(`enforcement_date`)을 함께 적는다.
 - 긴 조문은 쟁점에 닿는 항·호를 빠뜨리지 않는다. 받은 본문이 "…(생략)"으로 잘렸거나
   사용자·검색 의도가 "제N조 제K항 제M호"를 지목했으면 그 항이 실린 원문을 `get_article`·
@@ -339,9 +338,8 @@ Step 8: 각 결과를 issue_id에 매핑하고, 매핑 불가 결과 제거
     "application_text")`로 적용례·경과조치만 읽을 수 있다.
   - 질문에 사건일이 여럿이면(증여일과 양도일, 취득일과 양도일) Query Analysis가
     `timing.reason`에 적어 준다. 버전 경계가 그 사이에 있으면 각 날짜로 조회한다.
-- `before_data`면 `korean-law: get_law_text`(`efYd`=그 날짜) 또는 `korean-law: legal_analysis`
-  mode=`applicable_law`(`lawName`+`date`+`jo`)로 한 번 시도한다. korean-law가 없거나 거기서도
-  못 찾으면 "확인 불가"다.
+- `before_data`면 "확인 불가"다. 현행 조문으로 대신하지 않고, 그 시점 조문은 국가법령정보센터
+  (law.go.kr)에서 확인하도록 답변이 안내하게 `coverage_gaps`에 적는다.
 - `as_of`는 조문 버전만 바꿔 준다. 위임·별표·인용 관계는 현행 그래프 기준이라 시점 판
   응답에는 싣지 않는다. 함께 온 판례·해석례는 **현행 그래프 기준**으로
   이어진 것이므로, 그 문서가 기준일 당시 조문에 대한 것인지는 문서 날짜로 따로 본다.
@@ -408,8 +406,7 @@ Step 8: 각 결과를 issue_id에 매핑하고, 매핑 불가 결과 제거
 ### 3-4. 비세법 법령(nontax_law)
 
 세무 쟁점의 전제가 되는 세법 밖 법령(민법, 상법, 근로기준법, 주택임대차보호법 등)은
-`get_reference_article`로 먼저 조회하고, 참조 법령 목록에 없으면 `korean-law: search_law` →
-`get_law_text`로 조회한다(§2-D). 부동산실명법·상가건물 임대차보호법처럼 korea-tax-law 세법
+`get_reference_article`로 조회하고, 참조 법령 목록에 없으면 `coverage_gaps`에 적는다(§2-D). 부동산실명법·상가건물 임대차보호법처럼 korea-tax-law 세법
 목록에 수록된 관련 법령은 `get_article`로 바로 읽는다. 결과에는 `source_type: "nontax_law"`로
 구분 표시한다. 대표 트리거:
 
