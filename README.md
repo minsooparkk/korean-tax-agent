@@ -157,6 +157,8 @@ korean-tax-agent/
 연결이 안 되거나 결과가 이상하면 **hello@kernelspace.io**로 알려 주세요. 쓰신 질문과 받은 답을
 함께 보내 주시면 빨리 확인할 수 있습니다.
 
+TaxDoctor 를 쓴 사례와 질문은 재무 · 회계 · 세무 실무자 1,200명 넘게 모인 카카오톡 [재무 AI 오픈채팅방](https://open.kakao.com/o/gAUK185h)에서도 나눠요. TaxDoctor MCP 를 Claude 에 연결해 쓰는 영상은 유튜브 [AI CFO Lab](https://www.youtube.com/@AICFOLab)에 있어요.
+
 ## 면책
 
 이 스킬의 답변은 AI가 공개 법령정보를 검색해 작성한 참고 의견이며, 세무대리인의 검토를
